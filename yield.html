@@ -12,13 +12,16 @@
 <body>
 
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/@reactivex/rxjs@5.0.3/dist/global/Rx.js"></script>
     <script>
+        const dragonBall = new Rx.Subject();
+
         const Frieza = (function () {
             var state = 1;
             return {
                 chargingFlag: false,
                 damage: function () {
-                    return Math.random() < 0.2;
+                    return Math.random() < 0.1;
                 },
                 stateReset: function () {
                     state = 1;
@@ -26,10 +29,10 @@
                 getState: function () {
                     return state;
                 },
-                change: function (callback) {
+                change: function () {
 
                     if (this.chargingFlag === true) {
-                        throw new Error(`弗利萨还没变身完毕呢`);
+                        drangonBall.next(new Error('变身还没结束呢！'))
                     }
                     this.chargingFlag = true;
                     console.log(`弗利萨开始进行第${state + 1}形态变身`)
@@ -37,106 +40,34 @@
                         if (this.damage()) {
                             this.stateReset();
                             this.chargingFlag = false;
-                            callback(new Error('变身被悟空打断啦！'));
+                            dragonBall.next(new Error('变身被悟空打断啦！'));
                             return;
                         }
                         state++;
                         this.chargingFlag = false;
-                        callback(null, state);
+                        dragonBall.next(`${state}形态变身成功！`)
                     }, 1000)
                 }
 
             }
         })();
-        // promise
-        /* function keepChange() {
-            return new Promise((resolve, reject) => {
-                Frieza.change((err, state) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(state);
-                    }
-                })
-            })
-        }
-        function handelKeepChange() {
-            keepChange().then((x) => {
-             if(x !== 8){
-                handelKeepChange();
-             } else {
-                 console.log('成功！')
-             }
-        }).catch(err => {
-            console.log(err);
-            handelKeepChange();
-        })
-        }
-       handelKeepChange();
-       console.log('hahaha');
-       console.log('hahaha');
-       console.log('hahaha');
-       console.log('hahaha');
-       console.log('hahaha'); */
-        // generator + promise
 
-         function* async() {
-            while (Frieza.getState() !== 8) {
-                yield keepChange();
-            }
-            console.log('成功！');
-        }
-        function keepChange() {
-            return new Promise((resolve, reject) => {
-                Frieza.change((err, state) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(state);
-                    }
-                })
-            })
-        }
-        function handleAsync(asyncFn) {
-            const ita = asyncFn();
-            function handle(v) {
-                if (!v.done) {
-                    v.value.then(state => {
-                        handle(ita.next(state));
-                    }).catch(err => {
-                        console.log(err);
-                        handle(ita.next());
-                    })
+        const watchAnime = dragonBall.asObservable()
+            
+            .subscribe(message => {
+                console.log(message);
+                
+                if (Frieza.getState() !== 8) {
+                    Frieza.change();
+                } else {
+                    watchAnime.unsubscribe();
                 }
-            }
-            handle(ita.next());
-        }
-        handleAsync(async);
 
- 
-        /* function keepChange() {
-            return new Promise((resolve, reject) => {
-                Frieza.change((err, state) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(state);
-                    }
-                })
             })
-        }
-        async function handleAsync() {
-            while(Frieza.getState() !== 8){
-                try {
-                    await keepChange();
-                } catch (error) {
-                    console.log(error)
-                }
-            }
-            console.log('成功！');
-           
-        } 
-        handleAsync(); */
+
+        Frieza.change();
+
+
     </script>
 </body>
 
