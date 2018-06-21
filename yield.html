@@ -48,7 +48,7 @@
             }
         })();
         // promise
-         function keepChange() {
+        function keepChange() {
             return new Promise((resolve, reject) => {
                 Frieza.change((err, state) => {
                     if (err) {
@@ -61,21 +61,20 @@
         }
         function handelKeepChange() {
             keepChange().then((x) => {
-             if(x !== 8){
+                if (x !== 8) {
+                    handelKeepChange();
+                } else {
+                    console.log('成功！')
+                }
+            }).catch(err => {
+                console.log(err);
                 handelKeepChange();
-             } else {
-                 console.log('成功！')
-             }
-        }).catch(err => {
-            console.log(err);
-            handelKeepChange();
-        })
+            })
         }
-  
+
         handelKeepChange();
-       
- 
-        
+
+
     </script>
 </body>
 
